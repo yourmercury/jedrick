@@ -1,26 +1,109 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* ---------------------------------------------------------------------------
+   Jedrick Insurance Brokers — design tokens
+   Source: "Jedrick Brand Guideline, September 2025" (Merc Tech), sections 2.0
+   Colour ratio mandated by the guideline: 60% navy / 20% orange / 20% white.
+--------------------------------------------------------------------------- */
+
+@theme {
+  /* Primary — straight from the palette page of the brand guideline */
+  --color-navy: #1e3a8a;
+  --color-blue: #2563eb;
+  --color-orange: #f97316;
+
+  /* Secondary */
+  --color-gray-line: #cccccc;
+  --color-ink: #374151; /* "Charcoal Ink" — body copy */
+
+  /* Extensions: tints/shades derived from the primaries so navy can carry
+     large surfaces (60% of the page) without going flat. */
+  --color-navy-deep: #16296a;
+  --color-navy-ink: #0f1c48;
+  --color-navy-soft: #35519e;
+  --color-orange-deep: #ea580c;
+  --color-mist: #f5f6f9; /* page tint used throughout the guideline deck */
+  --color-mist-deep: #eceef4;
+
+  /* Type */
+  --font-display: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+
+  /* Motion */
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+  }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  body {
+    background: #ffffff;
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    color: var(--color-navy);
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+
+  ::selection {
+    background: var(--color-orange);
+    color: #ffffff;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-orange);
+    outline-offset: 3px;
+    border-radius: 2px;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer utilities {
+  /* Letterspaced micro-label, mirrors "INSURANCE BROKERS" in the wordmark */
+  .eyebrow {
+    font-family: var(--font-sans);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+
+  /* Subtle radial lift for navy surfaces so they read as brand, not as a slab */
+  .navy-field {
+    background-color: var(--color-navy);
+    background-image:
+      radial-gradient(
+        60rem 30rem at 15% -10%,
+        color-mix(in oklab, var(--color-blue) 55%, transparent),
+        transparent 60%
+      ),
+      radial-gradient(
+        40rem 24rem at 100% 0%,
+        color-mix(in oklab, var(--color-orange) 22%, transparent),
+        transparent 55%
+      );
+  }
+
+  .rule-fade {
+    background: linear-gradient(
+      to right,
+      var(--color-gray-line),
+      transparent
+    );
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
 }

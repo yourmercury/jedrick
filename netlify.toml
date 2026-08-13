@@ -1,0 +1,59 @@
+###############################################################################
+# Netlify configuration — Jedrick Insurance Brokers
+#
+# The Next.js runtime is installed automatically by Netlify for Next.js sites,
+# so @netlify/plugin-nextjs is deliberately NOT listed here and NOT added to
+# package.json. Netlify's docs are explicit that pinning it manually causes
+# version conflicts. Next.js 16 needs no adapter configuration.
+#
+# The git repository root is this directory, so no `base` is set. If the repo
+# is ever restructured so that `web/` sits inside a larger repo, set:
+#     base = "web"
+###############################################################################
+
+[build]
+  # Runs the content cross-reference check first — a broken reference between
+  # products, dictionary terms or articles fails the deploy rather than
+  # silently shipping a missing link.
+  command = "npm run build"
+  publish = ".next"
+
+[build.environment]
+  # Next.js 16 requires Node 20.9+. Pinned to the current LTS so a change to
+  # Netlify's default image cannot alter a build that already works.
+  NODE_VERSION = "22"
+  # Quieter install logs. Netlify already runs `npm ci` when a lockfile is
+  # present, so the lockfile is what determines the installed versions.
+  NPM_FLAGS = "--no-audit --no-fund"
+
+###############################################################################
+# Security headers
+#
+# This site accepts uploaded insurance policies, which are personal financial
+# documents. These headers are cheap and reduce the obvious classes of risk.
+###############################################################################
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "SAMEORIGIN"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    # No feature on this site needs any of these.
+    Permissions-Policy = "camera=(), microphone=(), geolocation=(), payment=(), usb=()"
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains"
+    Cross-Origin-Opener-Policy = "same-origin"
+
+# Brand SVGs and fonts are content-addressed by the build and safe to cache hard.
+[[headers]]
+  for = "/brand/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Lead endpoints must never be cached — by the browser, by Netlify, or by
+# anything in between.
+[[headers]]
+  for = "/api/*"
+  [headers.values]
+    Cache-Control = "no-store, max-age=0"
+    X-Robots-Tag = "noindex"
