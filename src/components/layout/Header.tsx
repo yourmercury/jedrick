@@ -28,6 +28,33 @@ export default function Header() {
     };
   }, [mobileOpen]);
 
+  /**
+   * Two ways out of the panel that are not a link tap.
+   *
+   * Escape, because a full-screen overlay should be dismissible without
+   * hunting for the X. And popstate, because the browser back button changes
+   * the page underneath an open panel — leaving the menu covering a page the
+   * visitor did not ask for.
+   *
+   * Link taps are handled by delegation on the panel itself, which also covers
+   * links pointing at the current page.
+   */
+  useEffect(() => {
+    if (!mobileOpen) return;
+
+    const close = () => setMobileOpen(false);
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") close();
+    };
+
+    window.addEventListener("keydown", onKey);
+    window.addEventListener("popstate", close);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      window.removeEventListener("popstate", close);
+    };
+  }, [mobileOpen]);
+
   return (
     <header className="sticky top-0 z-50">
       {/* Utility strip — puts a human contact route above everything else,
@@ -184,14 +211,21 @@ export default function Header() {
 
       {/* Mobile panel */}
       {mobileOpen && (
-        <div className="fixed inset-x-0 top-[4.5rem] bottom-0 z-40 overflow-y-auto bg-white xl:hidden">
+        /* The click handler is delegation, not decoration: the route-change
+           effect above cannot fire when a link points at the page you are
+           already on, and leaving the overlay up in that case looks broken. */
+        <div
+          onClick={(e) => {
+            if ((e.target as HTMLElement).closest("a")) setMobileOpen(false);
+          }}
+          className="fixed inset-x-0 top-[4.5rem] bottom-0 z-40 overflow-y-auto bg-white xl:hidden"
+        >
           <Container className="py-6">
             <nav className="flex flex-col divide-y divide-gray-line/40">
               {nav.map((item) => (
                 <div key={item.label} className="py-4">
                   <Link
                     href={item.href}
-                    onClick={() => setMobileOpen(false)}
                     className="font-display text-lg font-semibold text-navy"
                   >
                     {item.label}
@@ -202,7 +236,6 @@ export default function Header() {
                         <Link
                           key={child.href}
                           href={child.href}
-                          onClick={() => setMobileOpen(false)}
                           className="text-[0.95rem] text-ink/80"
                         >
                           {child.label}
